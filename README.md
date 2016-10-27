@@ -1,2 +1,9 @@
-# bignerdranch_photogallery
-Bignerdranch training - Android app "Photo Gallery"
+# Photo Gallery
+### Android app
+Bignerdranch training
+
+#### Exercises have been done in separate branches
+
+#
+
+[Download apk](../../raw/master/app/build/outputs/apk/app-debug.apk)
