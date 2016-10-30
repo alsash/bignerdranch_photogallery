@@ -3,6 +3,7 @@ package com.bignerdranch.android.bignerdranch_photogallery;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Example local unit test, which will execute on the development machine (host).

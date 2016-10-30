@@ -1,6 +1,7 @@
-package com.bignerdranch.android.bignerdranch_photogallery;
+package com.bignerdranch.android.bignerdranch_photogallery.ui;
 
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,7 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bignerdranch.android.bignerdranch_photogallery.R;
+import com.bignerdranch.android.bignerdranch_photogallery.data.FlickrFetchr;
+
 public class PhotoGalleryFragment extends Fragment {
+
+    private static final String TAG = "PhotoGalleryFragment";
 
     private RecyclerView mRecyclerView;
 
@@ -22,6 +28,7 @@ public class PhotoGalleryFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        new FetchItemTask().execute();
     }
 
     @Override
@@ -35,6 +42,14 @@ public class PhotoGalleryFragment extends Fragment {
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
 
         return rootView;
+    }
+
+    private class FetchItemTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            new FlickrFetchr().fetchItems();
+            return null;
+        }
     }
 
 }

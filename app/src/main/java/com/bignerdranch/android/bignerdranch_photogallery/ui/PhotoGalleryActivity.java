@@ -1,4 +1,4 @@
-package com.bignerdranch.android.bignerdranch_photogallery;
+package com.bignerdranch.android.bignerdranch_photogallery.ui;
 
 import android.support.v4.app.Fragment;
 
