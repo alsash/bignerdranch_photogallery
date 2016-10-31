@@ -2,8 +2,9 @@
 ### Android app
 Bignerdranch training
 
-#### Exercises have been done in separate branches
+#### Exercise in Chapter 23
+- Added Gson deserialization
 
 #
 
-[Download apk](../../raw/master/app/build/outputs/apk/app-debug.apk)
+[Download apk](../../raw/exercise_chapter23/app/build/outputs/apk/app-debug.apk)
