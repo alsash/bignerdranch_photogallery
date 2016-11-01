@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bignerdranch.android.bignerdranch_photogallery.R;
 import com.bignerdranch.android.bignerdranch_photogallery.data.FlickrFetchr;
@@ -25,6 +26,8 @@ public class PhotoGalleryFragment extends Fragment {
 
     private List<GalleryItem> mItems = new ArrayList<>();
     private RecyclerView mRecyclerView;
+    private PhotoAdapter mAdapter;
+    private boolean mIsLoad;
 
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
@@ -34,6 +37,7 @@ public class PhotoGalleryFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        mIsLoad = true;
         new FetchItemTask().execute();
     }
 
@@ -46,14 +50,39 @@ public class PhotoGalleryFragment extends Fragment {
         mRecyclerView = (RecyclerView) rootView
                 .findViewById(R.id.fragment_photo_gallery_recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if ((dy == 0) || mIsLoad) return; // Scroll down
+                GridLayoutManager lm = (GridLayoutManager) recyclerView.getLayoutManager();
+                int visibleItemPosition = lm.findLastVisibleItemPosition();
+                int lastItemPosition = recyclerView.getAdapter().getItemCount() - 1;
+                if (visibleItemPosition == lastItemPosition) {
+                    mIsLoad = true;
+                    new FetchItemTask().execute();
+                }
+            }
+        });
         setupAdapter();
         return rootView;
     }
 
     private void setupAdapter() {
         if (isAdded()) {
-            mRecyclerView.setAdapter(new PhotoAdapter(mItems));
+            if (mAdapter == null) {
+                mAdapter = new PhotoAdapter(mItems);
+                mRecyclerView.setAdapter(mAdapter);
+            } else {
+                mAdapter.setItems(mItems);
+                mAdapter.notifyDataSetChanged();
+            }
         }
+    }
+
+    private void notifyPageLoaded() {
+        Toast.makeText(getActivity(),
+                "Page # " + FlickrFetchr.getLoadedPage() + " was loaded",
+                Toast.LENGTH_SHORT).show();
     }
 
     private class PhotoHolder extends RecyclerView.ViewHolder {
@@ -94,6 +123,11 @@ public class PhotoGalleryFragment extends Fragment {
         public int getItemCount() {
             return mGalleryItems.size();
         }
+
+        public void setItems(List<GalleryItem> items) {
+            mGalleryItems = items;
+        }
+
     }
 
     private class FetchItemTask extends AsyncTask<Void, Void, List<GalleryItem>> {
@@ -104,8 +138,11 @@ public class PhotoGalleryFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<GalleryItem> items) {
-            mItems = items;
+            mItems.addAll(items);
+            mIsLoad = false;
             setupAdapter();
+            notifyPageLoaded();
+
         }
     }
 

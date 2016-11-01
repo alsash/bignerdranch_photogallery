@@ -4,8 +4,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.google.gson.Gson;
-
-import org.json.JSONException;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,6 +18,12 @@ public class FlickrFetchr {
 
     private static final String TAG = "FlickrFetchr";
     private static final String API_KEY = "e83bc" + "dd" + "331205310357" + "b83462ed347a6";
+    private static int sPage = 1;
+    private static int sPageLoaded;
+
+    public static int getLoadedPage() {
+        return sPageLoaded;
+    }
 
     public byte[] getUrlBytes(String urlSpec) throws IOException {
 
@@ -64,11 +69,12 @@ public class FlickrFetchr {
                     .appendQueryParameter("format", "json")
                     .appendQueryParameter("nojsoncallback", "1")
                     .appendQueryParameter("extras", "url_s")
+                    .appendQueryParameter("page", String.valueOf(sPage++))
                     .build().toString();
             String jsonString = getUrlString(url);
             parseItems(items, jsonString);
             Log.i(TAG, "Received JSON: " + jsonString);
-        } catch (JSONException je) {
+        } catch (JsonSyntaxException je) {
             Log.e(TAG, "Failed to parse JSON ", je);
         } catch (IOException ioe) {
             Log.e(TAG, "Failed to fetch items ", ioe);
@@ -77,10 +83,12 @@ public class FlickrFetchr {
     }
 
     private void parseItems(List<GalleryItem> items, String jsonString)
-            throws IOException, JSONException {
+            throws JsonSyntaxException {
 
         FlickrResponse response = new Gson()
                 .fromJson(jsonString, FlickrResponse.class);
+
+        sPageLoaded = response.getPage();
 
         for (GalleryItem item : response.getGalleryItems()) {
             if (item.getUrl() != null) {
