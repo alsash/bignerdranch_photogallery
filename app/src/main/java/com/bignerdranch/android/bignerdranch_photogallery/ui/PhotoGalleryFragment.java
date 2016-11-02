@@ -95,7 +95,7 @@ public class PhotoGalleryFragment extends Fragment {
 
     private void setupAdapter() {
         if (isAdded()) {
-            if (mAdapter == null) {
+            if (mRecyclerView.getAdapter() == null) {
                 mAdapter = new PhotoAdapter(mItems);
                 mRecyclerView.setAdapter(mAdapter);
             } else {
