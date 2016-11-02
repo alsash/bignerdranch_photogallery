@@ -23,11 +23,10 @@ import java.util.List;
 public class PhotoGalleryFragment extends Fragment {
 
     private static final String TAG = "PhotoGalleryFragment";
-
+    private static volatile boolean sLoad;
     private List<GalleryItem> mItems = new ArrayList<>();
     private RecyclerView mRecyclerView;
     private PhotoAdapter mAdapter;
-    private boolean mIsLoad;
 
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
@@ -37,7 +36,6 @@ public class PhotoGalleryFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        mIsLoad = true;
         new FetchItemTask().execute();
     }
 
@@ -53,12 +51,11 @@ public class PhotoGalleryFragment extends Fragment {
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if ((dy == 0) || mIsLoad) return; // Scroll down
+                if ((dy == 0) || sLoad) return; // Scroll down
                 GridLayoutManager lm = (GridLayoutManager) recyclerView.getLayoutManager();
                 int visibleItemPosition = lm.findLastVisibleItemPosition();
                 int lastItemPosition = recyclerView.getAdapter().getItemCount() - 1;
                 if (visibleItemPosition == lastItemPosition) {
-                    mIsLoad = true;
                     new FetchItemTask().execute();
                 }
             }
@@ -131,18 +128,23 @@ public class PhotoGalleryFragment extends Fragment {
     }
 
     private class FetchItemTask extends AsyncTask<Void, Void, List<GalleryItem>> {
+
         @Override
         protected List<GalleryItem> doInBackground(Void... params) {
             return new FlickrFetchr().fetchItems();
         }
 
         @Override
+        protected void onPreExecute() {
+            sLoad = true;
+        }
+
+        @Override
         protected void onPostExecute(List<GalleryItem> items) {
             mItems.addAll(items);
-            mIsLoad = false;
             setupAdapter();
             notifyPageLoaded();
-
+            sLoad = false;
         }
     }
 
