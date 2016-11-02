@@ -7,9 +7,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,10 +25,12 @@ import java.util.List;
 public class PhotoGalleryFragment extends Fragment {
 
     private static final String TAG = "PhotoGalleryFragment";
+    private static final int ITEM_MAX_WIDTH_DIP = 120;
     private static volatile boolean sLoad;
     private List<GalleryItem> mItems = new ArrayList<>();
     private RecyclerView mRecyclerView;
     private PhotoAdapter mAdapter;
+    private GridLayoutManager mLayoutManager;
 
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
@@ -47,7 +51,8 @@ public class PhotoGalleryFragment extends Fragment {
 
         mRecyclerView = (RecyclerView) rootView
                 .findViewById(R.id.fragment_photo_gallery_recycler_view);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        mLayoutManager = new GridLayoutManager(getActivity(), 1);
+        mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -60,8 +65,32 @@ public class PhotoGalleryFragment extends Fragment {
                 }
             }
         });
+
+        mRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (mRecyclerView.getWidth() > 0) {
+                            setupLayoutSpan();
+                        }
+                    }
+                });
         setupAdapter();
         return rootView;
+    }
+
+    private void setupLayoutSpan() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        int itemX = (int) (ITEM_MAX_WIDTH_DIP * metrics.density);
+        if (itemX == 0) return;
+
+        int scrX = mRecyclerView.getWidth();
+
+        int cols = scrX / itemX;
+        if (cols == 0) cols = 1;
+
+        mLayoutManager.setSpanCount(cols);
     }
 
     private void setupAdapter() {
