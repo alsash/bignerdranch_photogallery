@@ -57,6 +57,10 @@ public class ThumbnailDownloader<T> extends HandlerThread {
         }
     }
 
+    public void clearQueue() {
+        mRequestHandler.removeMessages(MESSAGE_DOWNLOAD);
+    }
+
     private void handleRequest(final T target) {
         try {
             final String url = mRequestMap.get(target);
@@ -67,6 +71,18 @@ public class ThumbnailDownloader<T> extends HandlerThread {
             final Bitmap bitmap = BitmapFactory
                     .decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
             Log.i(TAG, "Bitmap created");
+
+            mResponseHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mRequestMap.get(target) != url) {
+                        return;
+                    }
+
+                    mRequestMap.remove(target);
+                    mThumbnailDownloadListener.onThumbnailDownload(target, bitmap);
+                }
+            });
         } catch (IOException ioe) {
             Log.e(TAG, "Error downloading image", ioe);
         }
