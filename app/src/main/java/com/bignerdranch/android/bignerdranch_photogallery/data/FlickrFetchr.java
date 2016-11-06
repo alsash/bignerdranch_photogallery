@@ -73,9 +73,7 @@ public class FlickrFetchr {
     }
 
     private List<GalleryItem> downloadGalleryItems(String url) {
-
         List<GalleryItem> items = new ArrayList<>();
-
         try {
             String jsonString = getUrlString(url);
             JSONObject jsonBody = new JSONObject(jsonString);
