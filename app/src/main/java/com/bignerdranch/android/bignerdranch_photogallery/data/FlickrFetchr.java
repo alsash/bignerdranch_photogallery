@@ -20,7 +20,7 @@ public class FlickrFetchr {
     private static final String TAG = "FlickrFetchr";
     private static final String API_KEY = "e83bc" + "dd" + "331205310357" + "b83462ed347a6";
 
-    public byte[] getUrlButes(String urlSpec) throws IOException {
+    public byte[] getUrlBytes(String urlSpec) throws IOException {
 
         URL url = new URL(urlSpec);
 
@@ -49,7 +49,7 @@ public class FlickrFetchr {
     }
 
     public String getUrlString(String urlSpec) throws IOException {
-        return new String(getUrlButes(urlSpec));
+        return new String(getUrlBytes(urlSpec));
     }
 
     public List<GalleryItem> fetchItems() {
