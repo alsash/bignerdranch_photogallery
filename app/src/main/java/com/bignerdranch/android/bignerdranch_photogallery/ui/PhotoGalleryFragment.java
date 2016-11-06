@@ -25,6 +25,8 @@ import com.bignerdranch.android.bignerdranch_photogallery.utils.ThumbnailDownloa
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.WeakHashMap;
 
 public class PhotoGalleryFragment extends Fragment {
 
@@ -109,6 +111,7 @@ public class PhotoGalleryFragment extends Fragment {
     private class PhotoAdapter extends RecyclerView.Adapter<PhotoHolder> {
 
         private List<GalleryItem> mGalleryItems;
+        private WeakHashMap<String, Boolean> mPreloadMap = new WeakHashMap<>();
 
         public PhotoAdapter(List<GalleryItem> galleryItems) {
             mGalleryItems = galleryItems;
@@ -128,11 +131,41 @@ public class PhotoGalleryFragment extends Fragment {
                     R.drawable.bill_up_close, null);
             photoHolder.bindDrawable(placeholder);
             mThumbnailDownloader.queueThumbnail(photoHolder, galleryItem.getUrl());
+            // Preload 10 previous images
+            preloadPrevious(position, 10);
+            // Preload 10 next images
+            preloadNext(position, 10);
         }
 
         @Override
         public int getItemCount() {
             return mGalleryItems.size();
+        }
+
+        private void preloadNext(int position, int max) {
+            ListIterator<GalleryItem> iterator = mGalleryItems.listIterator(position);
+            int i = 1;
+            while (iterator.hasNext()) {
+                String url = iterator.next().getUrl();
+                if (mPreloadMap.get(url) == null) {
+                    mPreloadMap.put(url, true);
+                    mThumbnailDownloader.preloadThumbnail(url);
+                }
+                if (i++ >= 10) break;
+            }
+        }
+
+        private void preloadPrevious(int position, int max) {
+            ListIterator<GalleryItem> iterator = mGalleryItems.listIterator(position);
+            int i = 1;
+            while (iterator.hasPrevious()) {
+                String url = iterator.previous().getUrl();
+                if (mPreloadMap.get(url) == null) {
+                    mPreloadMap.put(url, true);
+                    mThumbnailDownloader.preloadThumbnail(url);
+                }
+                if (i++ >= max) break;
+            }
         }
     }
 
