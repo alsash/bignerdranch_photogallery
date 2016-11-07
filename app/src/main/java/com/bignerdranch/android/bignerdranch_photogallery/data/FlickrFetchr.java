@@ -30,7 +30,7 @@ public class FlickrFetchr {
             .appendQueryParameter("extras", "url_s")
             .build();
 
-    public byte[] getUrlBytes(String urlSpec) throws IOException {
+    public synchronized byte[] getUrlBytes(String urlSpec) throws IOException {
 
         URL url = new URL(urlSpec);
 
