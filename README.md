@@ -2,7 +2,8 @@
 ### Android app
 Bignerdranch training
 
-#### Exercises have been done in separate branches
+#### Exercise in Chapter 25
+- Added one more thing...
 
 #
 

@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.bignerdranch.android.bignerdranch_photogallery.R;
 import com.bignerdranch.android.bignerdranch_photogallery.data.FlickrFetchr;
@@ -37,6 +38,7 @@ public class PhotoGalleryFragment extends Fragment {
 
     private List<GalleryItem> mItems = new ArrayList<>();
     private RecyclerView mRecyclerView;
+    private ProgressBar mProgressBar;
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
 
     public static PhotoGalleryFragment newInstance() {
@@ -70,6 +72,10 @@ public class PhotoGalleryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
 
+        mProgressBar = (ProgressBar) rootView
+                .findViewById(R.id.fragment_photo_gallery_progress_bar);
+        mProgressBar.setVisibility(View.GONE);
+
         mRecyclerView = (RecyclerView) rootView
                 .findViewById(R.id.fragment_photo_gallery_recycler_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
@@ -101,8 +107,7 @@ public class PhotoGalleryFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d(TAG, "Query text submit" + query);
-                QueryPreferences.setSortedQuery(getActivity(), query);
-                updateItems();
+                submitSearch(query, searchView);
                 return true;
             }
 
@@ -131,6 +136,14 @@ public class PhotoGalleryFragment extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void submitSearch(String query, final SearchView searchView) {
+        QueryPreferences.setSortedQuery(getActivity(), query);
+        searchView.setQuery(null, false);
+        searchView.setIconified(true);
+        searchView.clearFocus();
+        updateItems();
     }
 
     private void updateItems() {
@@ -206,8 +219,20 @@ public class PhotoGalleryFragment extends Fragment {
         }
 
         @Override
+        protected void onPreExecute() {
+            mItems.clear();
+            setupAdapter();
+            if (mProgressBar != null) {
+                mProgressBar.setVisibility(View.VISIBLE);
+            }
+        }
+
+        @Override
         protected void onPostExecute(List<GalleryItem> items) {
             mItems = items;
+            if (mProgressBar != null) {
+                mProgressBar.setVisibility(View.GONE);
+            }
             setupAdapter();
         }
     }
