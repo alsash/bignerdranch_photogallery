@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import com.bignerdranch.android.bignerdranch_photogallery.R;
 import com.bignerdranch.android.bignerdranch_photogallery.data.FlickrFetchr;
 import com.bignerdranch.android.bignerdranch_photogallery.data.GalleryItem;
+import com.bignerdranch.android.bignerdranch_photogallery.service.PollService;
 import com.bignerdranch.android.bignerdranch_photogallery.utils.QueryPreferences;
 import com.bignerdranch.android.bignerdranch_photogallery.utils.ThumbnailDownloader;
 
@@ -48,7 +49,10 @@ public class PhotoGalleryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         setHasOptionsMenu(true);
+
         updateItems();
+
+        PollService.setServiceAlarm(getActivity(), true);
 
         Handler responseHandler = new Handler(); // on main thread
         mThumbnailDownloader = new ThumbnailDownloader<>(responseHandler);
