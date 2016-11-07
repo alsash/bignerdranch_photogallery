@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 
 public class QueryPreferences {
     private static final String PREF_SEARCH_QUERY = "SearchQuery";
+
     @Nullable
     public static String getSortedQuery(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
