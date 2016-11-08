@@ -25,7 +25,7 @@ import android.widget.ImageView;
 import com.bignerdranch.android.bignerdranch_photogallery.R;
 import com.bignerdranch.android.bignerdranch_photogallery.data.FlickrFetchr;
 import com.bignerdranch.android.bignerdranch_photogallery.data.GalleryItem;
-import com.bignerdranch.android.bignerdranch_photogallery.service.PollService;
+import com.bignerdranch.android.bignerdranch_photogallery.service.PollServiceManager;
 import com.bignerdranch.android.bignerdranch_photogallery.utils.QueryPreferences;
 import com.bignerdranch.android.bignerdranch_photogallery.utils.ThumbnailDownloader;
 
@@ -123,7 +123,7 @@ public class PhotoGalleryFragment extends Fragment {
         });
 
         MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
-        toggleItem.setTitle(PollService.isServiceAlarmOn(getActivity()) ?
+        toggleItem.setTitle(PollServiceManager.isServiceOn(getActivity()) ?
                 R.string.stop_polling :
                 R.string.start_polling
         );
@@ -138,8 +138,8 @@ public class PhotoGalleryFragment extends Fragment {
                 updateItems();
                 return true;
             case R.id.menu_item_toggle_polling:
-                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
-                PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
+                boolean shouldStart = !PollServiceManager.isServiceOn(getActivity());
+                PollServiceManager.setupService(getActivity(), shouldStart);
                 getActivity().invalidateOptionsMenu();
                 return true;
             default:

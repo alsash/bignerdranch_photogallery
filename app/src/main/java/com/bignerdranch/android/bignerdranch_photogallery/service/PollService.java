@@ -23,8 +23,9 @@ import java.util.List;
 
 public class PollService extends IntentService {
 
+    static final int POLL_INTERVAL_MS = 1000 * 60;
+
     private static final String TAG = "PollService";
-    private static final int POLL_INTERVAL_MS = 1000 * 60;
 
     public PollService() {
         super(TAG);
@@ -48,7 +49,7 @@ public class PollService extends IntentService {
             alarmManager.cancel(pendingIntent);
             pendingIntent.cancel();
         }
-        
+
     }
 
     public static boolean isServiceAlarmOn(Context context) {
@@ -58,23 +59,23 @@ public class PollService extends IntentService {
         return pendingIntent != null;
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        if (!isNetworkAvailableAndConnected()) return;
+    static synchronized void fetchPhotosAndSendNotification(Context context) {
+        Log.i(TAG, "fetch Photos And Send Notification");
 
-        Log.i(TAG, "onHandleIntent: Received an intent: " + intent);
-
-        String query = QueryPreferences.getSortedQuery(this);
-        String lastResultId = QueryPreferences.getLastResultId(this);
+        String query = QueryPreferences.getSortedQuery(context);
+        String lastResultId = QueryPreferences.getLastResultId(context);
         List<GalleryItem> items;
 
         if (query == null) {
+            Log.i(TAG, "fetchPhotosAndSendNotification: Query is null");
             items = new FlickrFetchr().fetchRecentPhotos();
         } else {
+            Log.i(TAG, "fetchPhotosAndSendNotification: Query = " + query);
             items = new FlickrFetchr().searchPhotos(query);
         }
 
         if (items.size() == 0) {
+            Log.i(TAG, "fetchPhotosAndSendNotification: items.size = 0");
             return;
         }
 
@@ -85,11 +86,12 @@ public class PollService extends IntentService {
             Log.i(TAG, "Got a new result: " + resultId);
         }
 
-        Resources resources = getResources();
-        Intent activityIntent = PhotoGalleryActivity.newIntent(this);
-        PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0, activityIntent, 0);
+        Resources resources = context.getResources();
+        Intent activityIntent = PhotoGalleryActivity.newIntent(context);
+        PendingIntent activityPendingIntent = PendingIntent
+                .getActivity(context, 0, activityIntent, 0);
 
-        Notification notification = new NotificationCompat.Builder(this)
+        Notification notification = new NotificationCompat.Builder(context)
                 .setTicker(resources.getString(R.string.new_pictures_title))
                 .setSmallIcon(android.R.drawable.ic_menu_report_image)
                 .setContentTitle(resources.getString(R.string.new_pictures_title))
@@ -97,11 +99,20 @@ public class PollService extends IntentService {
                 .setContentIntent(activityPendingIntent)
                 .setAutoCancel(true)
                 .build();
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(0, notification);
+        Log.i(TAG, "fetchPhotosAndSendNotification: Notification send");
 
-        QueryPreferences.setLastResultId(this, resultId);
+        QueryPreferences.setLastResultId(context, resultId);
+    }
 
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        if (!isNetworkAvailableAndConnected()) return;
+
+        Log.i(TAG, "onHandleIntent: Received an intent: " + intent);
+
+        fetchPhotosAndSendNotification(this);
     }
 
     private boolean isNetworkAvailableAndConnected() {

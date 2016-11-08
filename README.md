@@ -2,7 +2,8 @@
 ### Android app
 Bignerdranch training
 
-#### Exercises have been done in separate branches
+#### Exercise in Chapter 26
+- Added JobService with scheduler for PollService implementation on Lollipop+
 
 #
 
