@@ -11,13 +11,15 @@ import com.bignerdranch.android.bignerdranch_photogallery.service.PollService;
 
 public abstract class VisibleFragment extends Fragment {
     private static final String TAG = "VisibleFragment";
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        IntentFilter filter = new IntentFilter(PollService.ACTION_SHOW_NOTIFICATION);
-        getActivity().registerReceiver(mShowNotification, filter, PollService.PERM_PRIVATE, null);
-    }
+    private BroadcastReceiver mShowNotification = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(getActivity(),
+                    "Got a broadcast: " + intent.getAction(),
+                    Toast.LENGTH_LONG)
+                    .show();
+        }
+    };
 
     @Override
     public void onStart() {
@@ -31,14 +33,4 @@ public abstract class VisibleFragment extends Fragment {
         super.onStop();
         getActivity().unregisterReceiver(mShowNotification);
     }
-
-    private BroadcastReceiver mShowNotification = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Toast.makeText(getActivity(),
-                    "Got a broadcast: " + intent.getAction(),
-                    Toast.LENGTH_LONG)
-                    .show();
-        }
-    };
 }
