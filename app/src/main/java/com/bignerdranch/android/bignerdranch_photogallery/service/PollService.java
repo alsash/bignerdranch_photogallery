@@ -1,5 +1,6 @@
 package com.bignerdranch.android.bignerdranch_photogallery.service;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
@@ -10,7 +11,6 @@ import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.bignerdranch.android.bignerdranch_photogallery.R;
@@ -27,6 +27,8 @@ public class PollService extends IntentService {
             "com.bignerdranch.android.bignerdranch_photogallery.PRIVATE";
     public static final String ACTION_SHOW_NOTIFICATION =
             "com.bignerdranch.android.bignerdranch_photogallery.SHOW_NOTIFICATION";
+    public static final String REQUEST_CODE = "REQUEST_CODE";
+    public static final String NOTIFICATION = "NOTIFICATION";
 
     private static final String TAG = "PollService";
     private static final int POLL_INTERVAL_MS = 1000 * 60;
@@ -102,13 +104,18 @@ public class PollService extends IntentService {
                     .setContentIntent(activityPendingIntent)
                     .setAutoCancel(true)
                     .build();
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-            notificationManager.notify(0, notification);
-
-            sendBroadcast(new Intent(ACTION_SHOW_NOTIFICATION), PERM_PRIVATE);
+            showBackgroundNotification(0, notification);
         }
         QueryPreferences.setLastResultId(this, resultId);
 
+    }
+
+    private void showBackgroundNotification(int requestCode, Notification notification) {
+        Intent intent = new Intent(ACTION_SHOW_NOTIFICATION);
+        intent.putExtra(REQUEST_CODE, requestCode);
+        intent.putExtra(NOTIFICATION, notification);
+        sendOrderedBroadcast(intent, PERM_PRIVATE, null, null,
+                Activity.RESULT_OK, null, null);
     }
 
     private boolean isNetworkAvailableAndConnected() {
