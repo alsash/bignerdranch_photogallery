@@ -2,7 +2,9 @@
 ### Android app
 Bignerdranch training
 
-#### Exercises have been done in separate branches
+#### Exercise in Chapter 28
+- Added back support for Activity with WebView
+- Added native uri support for not http/https links
 
 #
 

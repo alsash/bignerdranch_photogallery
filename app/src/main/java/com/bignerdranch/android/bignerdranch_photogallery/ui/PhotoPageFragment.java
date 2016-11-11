@@ -10,14 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
 import com.bignerdranch.android.bignerdranch_photogallery.R;
 
-public class PhotoPageFragment extends VisibleFragment {
+public class PhotoPageFragment extends VisibleFragment
+        implements PhotoPageActivity.OnBackPressedListener {
 
     private static final String TAG = "PhotoPageFragment";
     private static final String ARG_URI = "argUri";
@@ -38,6 +38,10 @@ public class PhotoPageFragment extends VisibleFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mUri = getArguments().getParcelable(ARG_URI);
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -73,12 +77,27 @@ public class PhotoPageFragment extends VisibleFragment {
         });
 
         mWebView.setWebViewClient(new WebViewClient() {
+            @SuppressWarnings("deprecation")
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return false;
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url.startsWith("http")) {
+                    return false;
+                } else {
+                    return super.shouldOverrideUrlLoading(view, url);
+                }
             }
         });
         mWebView.loadUrl(mUri.toString());
         return rootView;
+    }
+
+    @Override
+    public boolean onBackPressedGoBack() {
+        boolean goBack = true;
+        if (mWebView.canGoBack()) {
+            mWebView.goBack();
+            goBack = false;
+        }
+        return goBack;
     }
 }
